@@ -93,6 +93,28 @@ internal sealed class PngReaderTests {
 	}
 
 	[Test]
+	public void ReadImage_ByteImageWrittenToDisk_RoundTrips() {
+		const int width = 16;
+		const int height = 16;
+		IBuffer<byte> source = _bufferFactory.Create( width, height, byte.MinValue );
+		for( int y = 0; y < height; y++ ) {
+			for( int x = 0; x < width; x++ ) {
+				source[x, y] = (byte)( ( ( y * width ) + x ) % 256 );
+			}
+		}
+		string filePath = Path.Combine( _folder, "greyscale.png" );
+		_writer.WriteImage( filePath, source );
+
+		IBuffer<byte> pixels = _reader.ReadImage<byte>( filePath );
+
+		for( int y = 0; y < height; y++ ) {
+			for( int x = 0; x < width; x++ ) {
+				Assert.That( pixels[x, y], Is.EqualTo( source[x, y] ), $"Pixel mismatch at ({x},{y})." );
+			}
+		}
+	}
+
+	[Test]
 	public void ReadImage_ColourImageAsBool_MapsBlackToFalse() {
 		IBuffer<uint> source = _bufferFactory.Create( 4, 4, 0x0A0B0CFFU );
 		source[1, 1] = 0x000000FFU;

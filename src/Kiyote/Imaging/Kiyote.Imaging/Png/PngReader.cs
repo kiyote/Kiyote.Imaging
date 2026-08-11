@@ -29,8 +29,9 @@ internal sealed class PngReader : IImageReader {
 		if( typeof( T ) != typeof( uint )
 			&& typeof( T ) != typeof( int )
 			&& typeof( T ) != typeof( bool )
+			&& typeof( T ) != typeof( byte )
 		) {
-			throw new NotSupportedException( "The pixel type is not supported. Supported types are: uint, int, bool." );
+			throw new NotSupportedException( "The pixel type is not supported. Supported types are: uint, int, bool, byte." );
 		}
 
 		byte[] bytes = _fileSystem.File.ReadAllBytes( filePath );
@@ -249,6 +250,21 @@ internal sealed class PngReader : IImageReader {
 			return (IBuffer<T>)buffer;
 		}
 
+		if( typeof( T ) == typeof( byte ) ) {
+			IBuffer<byte> buffer = _bufferFactory.Create( width, height, byte.MinValue );
+			for( int y = 0; y < height; y++ ) {
+				for( int x = 0; x < width; x++ ) {
+					int offset = ( ( y * width ) + x ) * 4;
+					buffer[x, y] = ToLuminance(
+						pixels[offset],
+						pixels[offset + 1],
+						pixels[offset + 2]
+					);
+				}
+			}
+			return (IBuffer<T>)buffer;
+		}
+
 		if( typeof( T ) == typeof( int ) ) {
 			IBuffer<int> buffer = _bufferFactory.Create( width, height, 0 );
 			for( int y = 0; y < height; y++ ) {
@@ -275,5 +291,14 @@ internal sealed class PngReader : IImageReader {
 		int y
 	) {
 		return BinaryPrimitives.ReadUInt32BigEndian( pixels.AsSpan( ( ( y * width ) + x ) * 4, 4 ) );
+	}
+
+	private static byte ToLuminance(
+		byte r,
+		byte g,
+		byte b
+	) {
+		double luminance = ( 0.2126 * r ) + ( 0.7152 * g ) + ( 0.0722 * b );
+		return (byte)Math.Clamp( Math.Round( luminance ), byte.MinValue, byte.MaxValue );
 	}
 }
