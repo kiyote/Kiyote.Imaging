@@ -115,8 +115,8 @@ internal sealed class PngWriterTests {
 
 		DecodedPng png = Decode();
 		using( Assert.EnterMultipleScope() ) {
-			Assert.That( png.GetPixel( 0, 0 ), Is.EqualTo( (0x00, 0x00, 0x00, 0xFF) ) );
-			Assert.That( png.GetPixel( 1, 0 ), Is.EqualTo( (0xFF, 0xFF, 0xFF, 0xFF) ) );
+			Assert.That( png.GetPixel( 0, 0 ), Is.EqualTo( (0xFF, 0xFF, 0xFF, 0xFF) ) );
+			Assert.That( png.GetPixel( 1, 0 ), Is.EqualTo( (0x00, 0x00, 0x00, 0xFF) ) );
 		}
 	}
 

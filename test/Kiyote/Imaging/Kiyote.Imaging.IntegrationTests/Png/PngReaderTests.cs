@@ -93,7 +93,7 @@ internal sealed class PngReaderTests {
 	}
 
 	[Test]
-	public void ReadImage_ColourImageAsBool_MapsBlackToTrue() {
+	public void ReadImage_ColourImageAsBool_MapsBlackToFalse() {
 		IBuffer<uint> source = _bufferFactory.Create( 4, 4, 0x0A0B0CFFU );
 		source[1, 1] = 0x000000FFU;
 		string filePath = Path.Combine( _folder, "asbool.png" );
@@ -102,8 +102,8 @@ internal sealed class PngReaderTests {
 		IBuffer<bool> pixels = _reader.ReadImage<bool>( filePath );
 
 		using( Assert.EnterMultipleScope() ) {
-			Assert.That( pixels[1, 1], Is.True );
-			Assert.That( pixels[0, 0], Is.False );
+			Assert.That( pixels[1, 1], Is.False );
+			Assert.That( pixels[0, 0], Is.True );
 		}
 	}
 }

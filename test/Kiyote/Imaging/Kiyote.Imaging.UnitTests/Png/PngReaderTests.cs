@@ -77,15 +77,15 @@ internal sealed class PngReaderTests {
 	}
 
 	[Test]
-	public void ReadImage_AsBool_BlackPixelsAreTrue() {
+	public void ReadImage_AsBool_BlackPixelsAreFalse() {
 		WriteUInt( 0x000000FFU, 0xFFFFFFFFU, 0x01000000U );
 
 		IBuffer<bool> pixels = _reader.ReadImage<bool>( _filePath );
 
 		using( Assert.EnterMultipleScope() ) {
-			Assert.That( pixels[0, 0], Is.True, "Black pixel should be true." );
-			Assert.That( pixels[1, 0], Is.False, "White pixel should be false." );
-			Assert.That( pixels[2, 0], Is.False, "Non-black pixel should be false." );
+			Assert.That( pixels[0, 0], Is.False, "Black pixel should be false." );
+			Assert.That( pixels[1, 0], Is.True, "White pixel should be true." );
+			Assert.That( pixels[2, 0], Is.True, "Non-black pixel should be true." );
 		}
 	}
 

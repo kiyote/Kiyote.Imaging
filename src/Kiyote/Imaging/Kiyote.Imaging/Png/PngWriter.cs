@@ -92,7 +92,7 @@ internal sealed class PngWriter : IImageWriter {
 		if( typeof( T ) == typeof( bool ) ) {
 			IBuffer<bool> source = (IBuffer<bool>)pixels;
 			for( int x = 0; x < width; x++ ) {
-				byte value = source[x, y] ? byte.MinValue : byte.MaxValue;
+				byte value = source[x, y] ? byte.MaxValue : byte.MinValue;
 				int offset = x * BytesPerPixel;
 				destination[offset] = value;
 				destination[offset + 1] = value;

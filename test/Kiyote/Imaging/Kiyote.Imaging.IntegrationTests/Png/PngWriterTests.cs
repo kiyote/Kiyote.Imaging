@@ -76,8 +76,8 @@ internal sealed class PngWriterTests {
 		for( int y = 0; y < height; y++ ) {
 			for( int x = 0; x < width; x++ ) {
 				(byte R, byte G, byte B, byte A) expected = pixels[x, y]
-					? ((byte)0x00, (byte)0x00, (byte)0x00, (byte)0xFF)
-					: ((byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF);
+					? ((byte)0xFF, (byte)0xFF, (byte)0xFF, (byte)0xFF)
+					: ((byte)0x00, (byte)0x00, (byte)0x00, (byte)0xFF);
 				Assert.That( png.GetPixel( x, y ), Is.EqualTo( expected ), $"Pixel mismatch at ({x},{y})." );
 			}
 		}
