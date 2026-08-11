@@ -30,7 +30,7 @@ internal sealed class PngReaderTests {
 	public void ReadImage_UnsupportedPixelType_ThrowsNotSupportedException() {
 		WriteUInt( 0x11223344U );
 
-		_ = Assert.Throws<NotSupportedException>( () => _reader.ReadImage<byte>( _filePath ) );
+		_ = Assert.Throws<NotSupportedException>( () => _reader.ReadImage<long>( _filePath ) );
 	}
 
 	[Test]
@@ -97,6 +97,41 @@ internal sealed class PngReaderTests {
 		_writer.WriteImage( _filePath, source );
 
 		IBuffer<bool> pixels = _reader.ReadImage<bool>( _filePath );
+
+		for( int y = 0; y < 2; y++ ) {
+			for( int x = 0; x < 3; x++ ) {
+				Assert.That( pixels[x, y], Is.EqualTo( source[x, y] ), $"Pixel mismatch at ({x},{y})." );
+			}
+		}
+	}
+
+	[Test]
+	public void ReadImage_AsByte_ReturnsLuminance() {
+		WriteUInt( 0x000000FFU, 0xFFFFFFFFU, 0x808080FFU, 0xFF0000FFU );
+
+		IBuffer<byte> pixels = _reader.ReadImage<byte>( _filePath );
+
+		using( Assert.EnterMultipleScope() ) {
+			Assert.That( pixels[0, 0], Is.EqualTo( 0 ), "Black should be 0." );
+			Assert.That( pixels[1, 0], Is.EqualTo( 255 ), "White should be 255." );
+			Assert.That( pixels[2, 0], Is.EqualTo( 128 ), "Mid grey should be preserved." );
+			Assert.That( pixels[3, 0], Is.EqualTo( 54 ), "Pure red luminance is 0.2126 * 255." );
+		}
+	}
+
+	[Test]
+	public void ReadImage_ByteImage_RoundTrips() {
+		IBuffer<byte> source = MockBuffer.Create<byte>( 3, 2 );
+		byte value = 0;
+		for( int y = 0; y < 2; y++ ) {
+			for( int x = 0; x < 3; x++ ) {
+				source[x, y] = value;
+				value += 50;
+			}
+		}
+		_writer.WriteImage( _filePath, source );
+
+		IBuffer<byte> pixels = _reader.ReadImage<byte>( _filePath );
 
 		for( int y = 0; y < 2; y++ ) {
 			for( int x = 0; x < 3; x++ ) {

@@ -34,6 +34,7 @@ internal static class MockBufferFactory {
 		Setup<uint>( factory );
 		Setup<int>( factory );
 		Setup<bool>( factory );
+		Setup<byte>( factory );
 		return factory.Object;
 	}
 

@@ -28,7 +28,7 @@ internal sealed class PngWriterTests {
 
 	[Test]
 	public void WriteImage_UnsupportedPixelType_ThrowsNotSupportedException() {
-		IBuffer<byte> pixels = MockBuffer.Create<byte>( 1, 1 );
+		IBuffer<long> pixels = MockBuffer.Create<long>( 1, 1 );
 
 		_ = Assert.Throws<NotSupportedException>( () => _writer.WriteImage( _filePath, pixels ) );
 		Assert.That( _fileSystem.File.Exists( _filePath ), Is.False );
@@ -136,6 +136,23 @@ internal sealed class PngWriterTests {
 			Assert.That( png.GetPixel( 1, 0 ), Is.EqualTo( (0x00, 0x00, 0xFF, 0x00) ) );
 			Assert.That( png.GetPixel( 0, 1 ), Is.EqualTo( (0x00, 0xFF, 0x00, 0x00) ) );
 			Assert.That( png.GetPixel( 1, 1 ), Is.EqualTo( (0xFF, 0x00, 0x00, 0x00) ) );
+		}
+	}
+
+	[Test]
+	public void WriteImage_ByteBuffer_WritesGreyscalePixels() {
+		IBuffer<byte> pixels = MockBuffer.Create<byte>( 3, 1 );
+		pixels[0, 0] = 0x00;
+		pixels[1, 0] = 0x80;
+		pixels[2, 0] = 0xFF;
+
+		_writer.WriteImage( _filePath, pixels );
+
+		DecodedPng png = Decode();
+		using( Assert.EnterMultipleScope() ) {
+			Assert.That( png.GetPixel( 0, 0 ), Is.EqualTo( (0x00, 0x00, 0x00, 0xFF) ), "0 should be black." );
+			Assert.That( png.GetPixel( 1, 0 ), Is.EqualTo( (0x80, 0x80, 0x80, 0xFF) ) );
+			Assert.That( png.GetPixel( 2, 0 ), Is.EqualTo( (0xFF, 0xFF, 0xFF, 0xFF) ), "255 should be white." );
 		}
 	}
 

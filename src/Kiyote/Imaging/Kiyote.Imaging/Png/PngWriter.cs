@@ -30,8 +30,9 @@ internal sealed class PngWriter : IImageWriter {
 		if (typeof(T) != typeof(uint)
 			&& typeof(T) != typeof(int)
 			&& typeof(T) != typeof(bool)
+			&& typeof(T) != typeof(byte)
 		) {
-			throw new NotSupportedException( "The pixel type is not supported. Supported types are: uint, int, bool." );
+			throw new NotSupportedException( "The pixel type is not supported. Supported types are: uint, int, bool, byte." );
 		}
 
 		ArgumentNullException.ThrowIfNull( pixels );
@@ -93,6 +94,19 @@ internal sealed class PngWriter : IImageWriter {
 			IBuffer<bool> source = (IBuffer<bool>)pixels;
 			for( int x = 0; x < width; x++ ) {
 				byte value = source[x, y] ? byte.MaxValue : byte.MinValue;
+				int offset = x * BytesPerPixel;
+				destination[offset] = value;
+				destination[offset + 1] = value;
+				destination[offset + 2] = value;
+				destination[offset + 3] = byte.MaxValue;
+			}
+			return;
+		}
+
+		if( typeof( T ) == typeof( byte ) ) {
+			IBuffer<byte> greyscaleSource = (IBuffer<byte>)pixels;
+			for( int x = 0; x < width; x++ ) {
+				byte value = greyscaleSource[x, y];
 				int offset = x * BytesPerPixel;
 				destination[offset] = value;
 				destination[offset + 1] = value;
