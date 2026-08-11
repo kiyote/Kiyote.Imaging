@@ -7,7 +7,7 @@ on:
     - '.github/workflows/ci.yml'
     - 'src/**'
     - 'test/**'
-    - 'Kiyote.Buffers.sln'
+    - 'Kiyote.Imaging.slnx'
     - 'Directory.Packages.props'
     - 'Directory.Build.props'
     - 'nuget.config'
@@ -47,7 +47,7 @@ jobs:
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
       
       - name: Build and Test
-        run: dotnet test /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=cobertura
+        run: dotnet test Kiyote.Imaging.slnx --collect:"XPlat Code Coverage" --settings .runsettings
 
       - name: Generate coverage file
         run: dotnet dotnet-coverage merge -o coverage.xml **/coverage.cobertura.xml -f cobertura
