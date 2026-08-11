@@ -241,9 +241,9 @@ internal sealed class PngReader : IImageReader {
 			for( int y = 0; y < height; y++ ) {
 				for( int x = 0; x < width; x++ ) {
 					int offset = ( ( y * width ) + x ) * 4;
-					buffer[x, y] = pixels[offset] == 0
-						&& pixels[offset + 1] == 0
-						&& pixels[offset + 2] == 0;
+					buffer[x, y] = pixels[offset] != 0
+						|| pixels[offset + 1] != 0
+						|| pixels[offset + 2] != 0;
 				}
 			}
 			return (IBuffer<T>)buffer;
