@@ -5,24 +5,45 @@ using Moq;
 namespace Kiyote.Imaging.UnitTests;
 
 [ExcludeFromCodeCoverage]
+internal sealed class FakeBuffer<T> : IBuffer<T> {
+
+	private readonly T[] _values;
+
+	public FakeBuffer(
+		int columns,
+		int rows,
+		T initialValue
+	) {
+		Columns = columns;
+		Rows = rows;
+		_values = new T[columns * rows];
+		Array.Fill( _values, initialValue );
+	}
+
+	public int Columns { get; }
+
+	public int Rows { get; }
+
+	public T this[int x, int y] {
+		get => _values[( y * Columns ) + x];
+		set => _values[( y * Columns ) + x] = value;
+	}
+
+	public Span<T> GetRowSpan(
+		int row
+	) {
+		return _values.AsSpan( row * Columns, Columns );
+	}
+}
+
+[ExcludeFromCodeCoverage]
 internal static class MockBuffer {
 
 	public static IBuffer<T> Create<T>(
 		int width,
 		int height
 	) {
-		T[] values = new T[width * height];
-		Mock<IBuffer<T>> buffer = new Mock<IBuffer<T>>();
-		_ = buffer.SetupGet( b => b.Columns ).Returns( width );
-		_ = buffer.SetupGet( b => b.Rows ).Returns( height );
-		_ = buffer
-			.Setup( b => b[It.IsAny<int>(), It.IsAny<int>()] )
-			.Returns( ( int x, int y ) => values[( y * width ) + x] );
-		buffer
-			.SetupSet( b => b[It.IsAny<int>(), It.IsAny<int>()] = It.IsAny<T>() )
-			.Callback( ( int x, int y, T value ) => values[( y * width ) + x] = value );
-
-		return buffer.Object;
+		return new FakeBuffer<T>( width, height, default! );
 	}
 }
 
@@ -43,14 +64,6 @@ internal static class MockBufferFactory {
 	) {
 		_ = factory
 			.Setup( f => f.Create( It.IsAny<int>(), It.IsAny<int>(), It.IsAny<T>() ) )
-			.Returns( ( int width, int height, T initialValue ) => {
-				IBuffer<T> buffer = MockBuffer.Create<T>( width, height );
-				for( int y = 0; y < height; y++ ) {
-					for( int x = 0; x < width; x++ ) {
-						buffer[x, y] = initialValue;
-					}
-				}
-				return buffer;
-			} );
+			.Returns( ( int width, int height, T initialValue ) => new FakeBuffer<T>( width, height, initialValue ) );
 	}
 }

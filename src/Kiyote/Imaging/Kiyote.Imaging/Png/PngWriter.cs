@@ -91,9 +91,9 @@ internal sealed class PngWriter : IImageWriter {
 		Span<byte> destination
 	) {
 		if( typeof( T ) == typeof( bool ) ) {
-			IBuffer<bool> source = (IBuffer<bool>)pixels;
+			ReadOnlySpan<bool> source = ( (IBuffer<bool>)pixels ).GetRowSpan( y );
 			for( int x = 0; x < width; x++ ) {
-				byte value = source[x, y] ? byte.MaxValue : byte.MinValue;
+				byte value = source[x] ? byte.MaxValue : byte.MinValue;
 				int offset = x * BytesPerPixel;
 				destination[offset] = value;
 				destination[offset + 1] = value;
@@ -104,9 +104,9 @@ internal sealed class PngWriter : IImageWriter {
 		}
 
 		if( typeof( T ) == typeof( byte ) ) {
-			IBuffer<byte> greyscaleSource = (IBuffer<byte>)pixels;
+			ReadOnlySpan<byte> greyscaleSource = ( (IBuffer<byte>)pixels ).GetRowSpan( y );
 			for( int x = 0; x < width; x++ ) {
-				byte value = greyscaleSource[x, y];
+				byte value = greyscaleSource[x];
 				int offset = x * BytesPerPixel;
 				destination[offset] = value;
 				destination[offset + 1] = value;
@@ -117,21 +117,21 @@ internal sealed class PngWriter : IImageWriter {
 		}
 
 		if( typeof( T ) == typeof( int ) ) {
-			IBuffer<int> intSource = (IBuffer<int>)pixels;
+			ReadOnlySpan<int> intSource = ( (IBuffer<int>)pixels ).GetRowSpan( y );
 			for( int x = 0; x < width; x++ ) {
 				BinaryPrimitives.WriteUInt32BigEndian(
 					destination.Slice( x * BytesPerPixel, BytesPerPixel ),
-					unchecked( (uint)intSource[x, y] )
+					unchecked( (uint)intSource[x] )
 				);
 			}
 			return;
 		}
 
-		IBuffer<uint> uintSource = (IBuffer<uint>)pixels;
+		ReadOnlySpan<uint> uintSource = ( (IBuffer<uint>)pixels ).GetRowSpan( y );
 		for( int x = 0; x < width; x++ ) {
 			BinaryPrimitives.WriteUInt32BigEndian(
 				destination.Slice( x * BytesPerPixel, BytesPerPixel ),
-				uintSource[x, y]
+				uintSource[x]
 			);
 		}
 	}

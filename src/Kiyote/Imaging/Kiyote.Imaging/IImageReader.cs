@@ -6,7 +6,7 @@ namespace Kiyote.Imaging;
 
 public interface IImageReader {
 
-	static IImageReader CreatePng() => new PngReader( IBufferFactory.CreateArrayFactory(), new FileSystem() );
+	static IImageReader CreatePng() => new PngReader( new ArrayBufferFactory(), new FileSystem() );
 
 	IBuffer<T> ReadImage<T>(
 		string filePath
