@@ -240,11 +240,13 @@ internal sealed class PngReader : IImageReader {
 		if( typeof( T ) == typeof( bool ) ) {
 			IBuffer<bool> buffer = _bufferFactory.Create( width, height, false );
 			for( int y = 0; y < height; y++ ) {
+				ReadOnlySpan<byte> source = pixels.AsSpan( y * width * 4, width * 4 );
+				Span<bool> row = buffer.GetRowSpan( y );
 				for( int x = 0; x < width; x++ ) {
-					int offset = ( ( y * width ) + x ) * 4;
-					buffer[x, y] = pixels[offset] != 0
-						|| pixels[offset + 1] != 0
-						|| pixels[offset + 2] != 0;
+					int offset = x * 4;
+					row[x] = source[offset] != 0
+						|| source[offset + 1] != 0
+						|| source[offset + 2] != 0;
 				}
 			}
 			return (IBuffer<T>)buffer;
@@ -253,12 +255,14 @@ internal sealed class PngReader : IImageReader {
 		if( typeof( T ) == typeof( byte ) ) {
 			IBuffer<byte> buffer = _bufferFactory.Create( width, height, byte.MinValue );
 			for( int y = 0; y < height; y++ ) {
+				ReadOnlySpan<byte> source = pixels.AsSpan( y * width * 4, width * 4 );
+				Span<byte> row = buffer.GetRowSpan( y );
 				for( int x = 0; x < width; x++ ) {
-					int offset = ( ( y * width ) + x ) * 4;
-					buffer[x, y] = ToLuminance(
-						pixels[offset],
-						pixels[offset + 1],
-						pixels[offset + 2]
+					int offset = x * 4;
+					row[x] = ToLuminance(
+						source[offset],
+						source[offset + 1],
+						source[offset + 2]
 					);
 				}
 			}
@@ -268,8 +272,10 @@ internal sealed class PngReader : IImageReader {
 		if( typeof( T ) == typeof( int ) ) {
 			IBuffer<int> buffer = _bufferFactory.Create( width, height, 0 );
 			for( int y = 0; y < height; y++ ) {
+				ReadOnlySpan<byte> source = pixels.AsSpan( y * width * 4, width * 4 );
+				Span<int> row = buffer.GetRowSpan( y );
 				for( int x = 0; x < width; x++ ) {
-					buffer[x, y] = unchecked( (int)ToRgba( pixels, width, x, y ) );
+					row[x] = BinaryPrimitives.ReadInt32BigEndian( source.Slice( x * 4, 4 ) );
 				}
 			}
 			return (IBuffer<T>)buffer;
@@ -277,20 +283,13 @@ internal sealed class PngReader : IImageReader {
 
 		IBuffer<uint> pixelBuffer = _bufferFactory.Create( width, height, 0U );
 		for( int y = 0; y < height; y++ ) {
+			ReadOnlySpan<byte> source = pixels.AsSpan( y * width * 4, width * 4 );
+			Span<uint> row = pixelBuffer.GetRowSpan( y );
 			for( int x = 0; x < width; x++ ) {
-				pixelBuffer[x, y] = ToRgba( pixels, width, x, y );
+				row[x] = BinaryPrimitives.ReadUInt32BigEndian( source.Slice( x * 4, 4 ) );
 			}
 		}
 		return (IBuffer<T>)pixelBuffer;
-	}
-
-	private static uint ToRgba(
-		byte[] pixels,
-		int width,
-		int x,
-		int y
-	) {
-		return BinaryPrimitives.ReadUInt32BigEndian( pixels.AsSpan( ( ( y * width ) + x ) * 4, 4 ) );
 	}
 
 	private static byte ToLuminance(
