@@ -1,6 +1,6 @@
 <Project>
 	<PropertyGroup>
-		<ProductVersion>0.0.4</ProductVersion>
+		<ProductVersion>0.0.5</ProductVersion>
 		<Version Condition=" '$(ProductVersion)' == '' ">0.0.1</Version>
 		<Version Condition=" '$(ProductVersion)' != '' ">$(ProductVersion)</Version>		
 	</PropertyGroup>
@@ -21,6 +21,10 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
+		<Authors>Todd Lang</Authors>
+		<PackageProjectUrl>https://github.com/kiyote/Kiyote.Imaging</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/kiyote/Kiyote.Imaging</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 	</PropertyGroup>
 </Project>
