@@ -6,7 +6,7 @@ using Kiyote.Buffers;
 
 namespace Kiyote.Imaging.Png;
 
-internal sealed class PngWriter : IImageWriter {
+public sealed class PngWriter : IImageWriter {
 
 	private const byte BitDepth = 8;
 	private const byte ColourTypeRgba = 6;

@@ -6,7 +6,7 @@ using Kiyote.Buffers;
 
 namespace Kiyote.Imaging.Png;
 
-internal sealed class PngReader : IImageReader {
+public sealed class PngReader : IImageReader {
 
 	private static readonly byte[] _signature = [137, 80, 78, 71, 13, 10, 26, 10];
 
