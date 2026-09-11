@@ -1,7 +1,9 @@
+using System.Diagnostics.CodeAnalysis;
 using Kiyote.Buffers;
 
 namespace Kiyote.Imaging;
 
+[ExcludeFromCodeCoverage]
 internal sealed class ArrayBufferFactory : IBufferFactory {
 
 	IBuffer<T> IBufferFactory.Create<T>(
