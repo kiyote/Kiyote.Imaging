@@ -1,0 +1,24 @@
+name: Dependabot Auto-Merge
+
+on: pull_request
+
+permissions:
+  pull-requests: write
+  contents: write
+
+jobs:
+  automerge:
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
+    steps:
+      - name: Dependabot metadata
+        uses: dependabot/fetch-metadata@v3
+        id: metadata
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Enable auto-merge for minor and patch
+        if: steps.metadata.metadata.update-type != 'version-update:semver-major'
+        run: gh pr merge --auto --merge "$","$GITHUB_REF_NAME"
+        env:
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
