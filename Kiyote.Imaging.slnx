@@ -3,6 +3,7 @@
     <File Path=".editorconfig" />
     <File Path=".gitignore" />
     <File Path=".runsettings" />
+    <File Path="CODEOWNERS" />
     <File Path="create-orphan-branch.sh" />
     <File Path="DEVELOPMENT.md" />
     <File Path="Directory.Build.props" />
