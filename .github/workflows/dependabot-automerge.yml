@@ -1,24 +1,20 @@
-name: Dependabot Auto-Merge
-
-on: pull_request
-
+name: Dependabot auto-merge
+on: pull_request_target
 permissions:
   pull-requests: write
   contents: write
-
 jobs:
-  automerge:
+  dependabot:
     runs-on: ubuntu-latest
-    if: github.actor == 'dependabot[bot]'
+    if: github.event.pull_request.user.login == 'dependabot[bot]' && github.repository == 'kiyote/Kiyote.Imaging'
     steps:
       - name: Dependabot metadata
+        id: dependabot-metadata
         uses: dependabot/fetch-metadata@v3
-        id: metadata
         with:
+          # Passes the token to the metadata fetcher as recommended by GitHub
           github-token: "${{ secrets.GITHUB_TOKEN }}"
-
-      - name: Enable auto-merge for minor and patch
-        if: steps.metadata.metadata.update-type != 'version-update:semver-major'
-        run: gh pr merge --auto --merge "$","$GITHUB_REF_NAME"
+      - name: Enable auto-merge for Dependabot PRs
+        run: gh pr merge --auto --merge "${{github.event.pull_request.html_url}}"
         env:
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
