@@ -1,16 +1,9 @@
-using System.Buffers.Binary;
 using System.IO.Abstractions;
-using System.IO.Compression;
-using System.Text;
 using Kiyote.Buffers;
 
 namespace Kiyote.Imaging.Png;
 
 public sealed class PngWriter : IImageWriter {
-
-	private const byte BitDepth = 8;
-	private const byte ColourTypeRgba = 6;
-	private const int BytesPerPixel = 4;
 
 	private static readonly byte[] _signature = [137, 80, 78, 71, 13, 10, 26, 10];
 
@@ -27,13 +20,7 @@ public sealed class PngWriter : IImageWriter {
 		string filePath,
 		IBuffer<T> pixels
 	) {
-		if (typeof(T) != typeof(uint)
-			&& typeof(T) != typeof(int)
-			&& typeof(T) != typeof(bool)
-			&& typeof(T) != typeof(byte)
-		) {
-			throw new NotSupportedException( "The pixel type is not supported. Supported types are: uint, int, bool, byte." );
-		}
+		PngChunkWriter.ThrowIfPixelTypeNotSupported<T>();
 
 		ArgumentNullException.ThrowIfNull( pixels );
 
@@ -43,118 +30,9 @@ public sealed class PngWriter : IImageWriter {
 		using Stream output = _fileSystem.File.Create( filePath );
 		output.Write( _signature );
 
-		WriteHeader( output, width, height );
-		WriteData( output, pixels, width, height );
-		WriteChunk( output, "IEND", [] );
-	}
-
-	private static void WriteHeader(
-		Stream output,
-		int width,
-		int height
-	) {
-		byte[] header = new byte[13];
-		BinaryPrimitives.WriteInt32BigEndian( header.AsSpan( 0, 4 ), width );
-		BinaryPrimitives.WriteInt32BigEndian( header.AsSpan( 4, 4 ), height );
-		header[8] = BitDepth;
-		header[9] = ColourTypeRgba;
-		header[10] = 0; // Compression method
-		header[11] = 0; // Filter method
-		header[12] = 0; // Interlace method
-
-		WriteChunk( output, "IHDR", header );
-	}
-
-	private static void WriteData<T>(
-		Stream output,
-		IBuffer<T> pixels,
-		int width,
-		int height
-	) {
-		using MemoryStream raw = new MemoryStream();
-		using( ZLibStream compressor = new ZLibStream( raw, CompressionLevel.Optimal, leaveOpen: true ) ) {
-			byte[] scanline = new byte[1 + ( width * BytesPerPixel )];
-			for( int y = 0; y < height; y++ ) {
-				scanline[0] = 0; // Filter type: None
-				FillScanline( pixels, y, width, scanline.AsSpan( 1 ) );
-				compressor.Write( scanline );
-			}
-		}
-
-		WriteChunk( output, "IDAT", raw.GetBuffer().AsSpan( 0, (int)raw.Length ) );
-	}
-
-	private static void FillScanline<T>(
-		IBuffer<T> pixels,
-		int y,
-		int width,
-		Span<byte> destination
-	) {
-		if( typeof( T ) == typeof( bool ) ) {
-			ReadOnlySpan<bool> source = ( (IBuffer<bool>)pixels ).GetRowSpan( y );
-			for( int x = 0; x < width; x++ ) {
-				byte value = source[x] ? byte.MaxValue : byte.MinValue;
-				int offset = x * BytesPerPixel;
-				destination[offset] = value;
-				destination[offset + 1] = value;
-				destination[offset + 2] = value;
-				destination[offset + 3] = byte.MaxValue;
-			}
-			return;
-		}
-
-		if( typeof( T ) == typeof( byte ) ) {
-			ReadOnlySpan<byte> greyscaleSource = ( (IBuffer<byte>)pixels ).GetRowSpan( y );
-			for( int x = 0; x < width; x++ ) {
-				byte value = greyscaleSource[x];
-				int offset = x * BytesPerPixel;
-				destination[offset] = value;
-				destination[offset + 1] = value;
-				destination[offset + 2] = value;
-				destination[offset + 3] = byte.MaxValue;
-			}
-			return;
-		}
-
-		if( typeof( T ) == typeof( int ) ) {
-			ReadOnlySpan<int> intSource = ( (IBuffer<int>)pixels ).GetRowSpan( y );
-			for( int x = 0; x < width; x++ ) {
-				BinaryPrimitives.WriteUInt32BigEndian(
-					destination.Slice( x * BytesPerPixel, BytesPerPixel ),
-					unchecked( (uint)intSource[x] )
-				);
-			}
-			return;
-		}
-
-		ReadOnlySpan<uint> uintSource = ( (IBuffer<uint>)pixels ).GetRowSpan( y );
-		for( int x = 0; x < width; x++ ) {
-			BinaryPrimitives.WriteUInt32BigEndian(
-				destination.Slice( x * BytesPerPixel, BytesPerPixel ),
-				uintSource[x]
-			);
-		}
-	}
-
-	private static void WriteChunk(
-		Stream output,
-		string type,
-		ReadOnlySpan<byte> data
-	) {
-		Span<byte> length = stackalloc byte[4];
-		BinaryPrimitives.WriteInt32BigEndian( length, data.Length );
-		output.Write( length );
-
-		Span<byte> typeBytes = stackalloc byte[4];
-		_ = Encoding.ASCII.GetBytes( type, typeBytes );
-		output.Write( typeBytes );
-		output.Write( data );
-
-		uint crc = PngCrc.Update( 0xFFFFFFFFU, typeBytes );
-		crc = PngCrc.Update( crc, data ) ^ 0xFFFFFFFFU;
-
-		Span<byte> crcBytes = stackalloc byte[4];
-		BinaryPrimitives.WriteUInt32BigEndian( crcBytes, crc );
-		output.Write( crcBytes );
+		PngChunkWriter.WriteHeader( output, width, height );
+		byte[] compressed = PngChunkWriter.CompressFrame( pixels, width, height );
+		PngChunkWriter.WriteChunk( output, "IDAT", compressed );
+		PngChunkWriter.WriteChunk( output, "IEND", [] );
 	}
 }
