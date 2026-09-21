@@ -7,13 +7,13 @@ Intel Core i7-9700K CPU 3.60GHz (Coffee Lake), 1 CPU, 8 logical and 8 physical c
   [Host] : .NET 10.0.12 (10.0.12, 10.0.1226.42308), X64 RyuJIT x86-64-v3
 ```
 
-## GifWriter
-| Method     | Mean     | Error    | StdDev   | Gen0    | Gen1    | Gen2    | Allocated |
-|----------- |---------:|---------:|---------:|--------:|--------:|--------:|----------:|
-| WriteImage | 262.9 us | 12.94 us | 11.47 us | 30.2734 | 30.2734 | 30.2734 |  232.4 KB |
+## GifAnimationWriter
+| Method         | Mean     | Error   | StdDev  | Allocated |
+|--------------- |---------:|--------:|--------:|----------:|
+| WriteAnimation | 727.1 us | 6.17 us | 4.81 us |      61 B |
 
 
 ## GifImageWriter
 | Method     | Mean     | Error    | StdDev   | Allocated |
 |----------- |---------:|---------:|---------:|----------:|
-| WriteImage | 65.93 us | 1.363 us | 1.208 us |       1 B |
+| WriteImage | 68.64 us | 0.834 us | 0.652 us |         - |

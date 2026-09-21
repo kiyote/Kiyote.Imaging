@@ -22,7 +22,7 @@ public sealed class APngWriter : IAnimationWriter {
 		ArgumentOutOfRangeException.ThrowIfNegative( loopCount );
 
 		Stream stream = _fileSystem.File.Create( filePath );
-		return new APngAnimationBuilder( stream, frameDelay, loopCount );
+		return StartAnimation( stream, frameDelay, loopCount, ownsStream: true );
 	}
 
 	IAnimationBuilder IAnimationWriter.StartAnimation(
@@ -30,9 +30,18 @@ public sealed class APngWriter : IAnimationWriter {
 		TimeSpan frameDelay,
 		int loopCount
 	) {
+		return StartAnimation( stream, frameDelay, loopCount, ownsStream: false );
+	}
+
+	private static IAnimationBuilder StartAnimation(
+		Stream stream,
+		TimeSpan frameDelay,
+		int loopCount,
+		bool ownsStream
+	) {
 		ArgumentNullException.ThrowIfNull( stream );
 		ArgumentOutOfRangeException.ThrowIfNegative( loopCount );
 
-		return new APngAnimationBuilder( stream, frameDelay, loopCount );
+		return new APngAnimationBuilder( stream, frameDelay, loopCount, ownsStream );
 	}
 }

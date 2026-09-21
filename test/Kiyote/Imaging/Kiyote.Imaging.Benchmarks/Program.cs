@@ -14,6 +14,7 @@ ManualConfig config = DefaultConfig.Instance
 BenchmarkSwitcher
 	.FromTypes( [
 		typeof( GifImageWriterBenchmarks ),
+		typeof( GifAnimationWriterBenchmarks ),
 	] )
 	.RunAll( config, args );
 

@@ -7,6 +7,7 @@ internal sealed class GifAnimationBuilder : GifWriterBase, IAnimationBuilder {
 	private readonly Stream _output;
 	private readonly TimeSpan _frameDelay;
 	private readonly int _loopCount;
+	private readonly bool _ownsStream;
 	private bool _headerWritten;
 	private bool _finished;
 	private int _width;
@@ -17,11 +18,13 @@ internal sealed class GifAnimationBuilder : GifWriterBase, IAnimationBuilder {
 	public GifAnimationBuilder(
 		Stream stream,
 		TimeSpan frameDelay,
-		int loopCount
+		int loopCount,
+		bool ownsStream = false
 	) {
 		_output = stream;
 		_frameDelay = frameDelay;
 		_loopCount = loopCount;
+		_ownsStream = ownsStream;
 	}
 
 	void IAnimationBuilder.AddFrame<T>(
@@ -69,13 +72,17 @@ internal sealed class GifAnimationBuilder : GifWriterBase, IAnimationBuilder {
 		try {
 			WriteTrailer( _output );
 		} finally {
-			_output.Dispose();
+			if( _ownsStream ) {
+				_output.Dispose();
+			}
 			_finished = true;
 		}
 	}
 
 	void IDisposable.Dispose() {
-		_output?.Dispose();
+		if( _ownsStream ) {
+			_output?.Dispose();
+		}
 	}
 }
 

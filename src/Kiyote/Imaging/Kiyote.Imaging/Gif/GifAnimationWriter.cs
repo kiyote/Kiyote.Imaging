@@ -22,7 +22,7 @@ public sealed class GifAnimationWriter : IAnimationWriter {
 		ArgumentOutOfRangeException.ThrowIfNegative( loopCount );
 
 		Stream stream = _fileSystem.File.Create( filePath );
-		return new GifAnimationBuilder( stream, frameDelay, loopCount );
+		return StartAnimation( stream, frameDelay, loopCount, ownsStream: true );
 	}
 
 	IAnimationBuilder IAnimationWriter.StartAnimation(
@@ -30,9 +30,18 @@ public sealed class GifAnimationWriter : IAnimationWriter {
 		TimeSpan frameDelay,
 		int loopCount
 	) {
+		return StartAnimation( file, frameDelay, loopCount, ownsStream: false );
+	}
+
+	private static IAnimationBuilder StartAnimation(
+		Stream file,
+		TimeSpan frameDelay,
+		int loopCount,
+		bool ownsStream
+	) {
 		ArgumentNullException.ThrowIfNull( file );
 		ArgumentOutOfRangeException.ThrowIfNegative( loopCount );
 
-		return new GifAnimationBuilder( file, frameDelay, loopCount );
+		return new GifAnimationBuilder( file, frameDelay, loopCount, ownsStream );
 	}
 }
