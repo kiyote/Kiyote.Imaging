@@ -2,7 +2,7 @@ using Kiyote.Buffers;
 
 namespace Kiyote.Imaging.Gif;
 
-internal sealed class GifAnimationBuilder : IAnimationBuilder {
+internal sealed class GifAnimationBuilder : GifWriterBase, IAnimationBuilder {
 
 	private readonly Stream _output;
 	private readonly TimeSpan _frameDelay;
@@ -27,7 +27,7 @@ internal sealed class GifAnimationBuilder : IAnimationBuilder {
 	void IAnimationBuilder.AddFrame<T>(
 		IBuffer<T> frame
 	) {
-		GifChunkWriter.ThrowIfPixelTypeNotSupported<T>();
+		ThrowIfPixelTypeNotSupported<T>();
 		ArgumentNullException.ThrowIfNull( frame );
 
 		if( _finished ) {
@@ -37,23 +37,22 @@ internal sealed class GifAnimationBuilder : IAnimationBuilder {
 		if( !_headerWritten ) {
 			_width = frame.Columns;
 			_height = frame.Rows;
-			_minCodeSize = GifChunkWriter.GetMinCodeSize<T>();
+			_minCodeSize = GetMinCodeSize<T>();
 
-			GifChunkWriter.WriteSignature( _output );
-			GifChunkWriter.WriteLogicalScreenDescriptor( _output, _width, _height, GifChunkWriter.GetColorTableSizeExponent<T>() );
-			_output.Write( GifChunkWriter.GetPalette<T>() );
-			GifChunkWriter.WriteNetscapeLoopExtension( _output, _loopCount );
+			WriteSignature( _output );
+			WriteLogicalScreenDescriptor( _output, _width, _height, GetColorTableSizeExponent<T>() );
+			WritePalette<T>( _output );
+			WriteNetscapeLoopExtension( _output, _loopCount );
 			_headerWritten = true;
 		} else if( frame.Columns != _width || frame.Rows != _height ) {
 			throw new NotSupportedException( "All frames of an animation must have the same dimensions." );
 		}
 
 		ushort delayCentiseconds = (ushort)Math.Clamp( _frameDelay.TotalMilliseconds / 10, 0, ushort.MaxValue );
-		GifChunkWriter.WriteGraphicControlExtension( _output, delayCentiseconds );
+		WriteGraphicControlExtension( _output, delayCentiseconds );
 
-		byte[] indices = GifChunkWriter.GetIndices( frame, _width, _height );
-		GifChunkWriter.WriteImageDescriptor( _output, _width, _height );
-		GifChunkWriter.WriteImageData( _output, indices, _minCodeSize );
+		WriteImageDescriptor( _output, _width, _height );
+		WriteImageData( _output, frame, _width, _height, _minCodeSize );
 
 		_frameCount++;
 	}
@@ -68,7 +67,7 @@ internal sealed class GifAnimationBuilder : IAnimationBuilder {
 		}
 
 		try {
-			GifChunkWriter.WriteTrailer( _output );
+			WriteTrailer( _output );
 		} finally {
 			_output.Dispose();
 			_finished = true;
@@ -79,3 +78,4 @@ internal sealed class GifAnimationBuilder : IAnimationBuilder {
 		_output?.Dispose();
 	}
 }
+

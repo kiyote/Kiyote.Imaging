@@ -17,7 +17,6 @@ public static class ExtensionMethods {
 			.AddBuffers()
 			.AddSingleton<IFileSystem, FileSystem>()
 			.AddSingleton<IImageWriter, PngWriter>()
-			.AddSingleton<IImageReader, PngReader>()
 			.AddSingleton<IAnimationWriter, APngWriter>();
 	}
 
@@ -30,7 +29,6 @@ public static class ExtensionMethods {
 			.AddBuffers()
 			.AddSingleton<IFileSystem, FileSystem>()
 			.AddSingleton<IImageWriter, GifImageWriter>()
-			.AddSingleton<IImageReader, GifReader>()
 			.AddSingleton<IAnimationWriter, GifAnimationWriter>();
 	}
 }

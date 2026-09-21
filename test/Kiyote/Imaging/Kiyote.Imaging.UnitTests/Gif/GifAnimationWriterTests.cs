@@ -93,26 +93,4 @@ internal sealed class GifAnimationWriterTests {
 		_ = Assert.Throws<NotSupportedException>( () => builder.AddFrame( second ) );
 	}
 
-	[Test]
-	public void FinishAnimation_MultipleFrames_CanBeReadBackAsFrames() {
-		IBuffer<byte> first = MockBuffer.Create<byte>( 2, 2 );
-		first[0, 0] = 10;
-		IBuffer<byte> second = MockBuffer.Create<byte>( 2, 2 );
-		second[0, 0] = 200;
-
-		using( IAnimationBuilder builder = _writer.StartAnimation( _filePath, TimeSpan.FromMilliseconds( 100 ), 5 ) ) {
-			builder.AddFrame( first );
-			builder.AddFrame( second );
-			builder.FinishAnimation();
-		}
-
-		byte[] bytes = _fileSystem.File.ReadAllBytes( _filePath );
-		System.Collections.Generic.List<GifFrame> frames = GifChunkReader.ReadAllFrames( bytes );
-
-		using( Assert.EnterMultipleScope() ) {
-			Assert.That( frames, Has.Count.EqualTo( 2 ) );
-			Assert.That( frames[0].Palette[frames[0].Indices[0] * 3], Is.EqualTo( 10 ) );
-			Assert.That( frames[1].Palette[frames[1].Indices[0] * 3], Is.EqualTo( 200 ) );
-		}
-	}
 }
