@@ -1,16 +1,12 @@
-using System.IO.Abstractions;
 using Kiyote.Buffers;
 
 namespace Kiyote.Imaging.Gif;
 
 internal sealed class GifAnimationBuilder : IAnimationBuilder {
 
-	private readonly IFileSystem _fileSystem;
-	private readonly string _filePath;
+	private readonly Stream _output;
 	private readonly TimeSpan _frameDelay;
 	private readonly int _loopCount;
-
-	private Stream? _output;
 	private bool _headerWritten;
 	private bool _finished;
 	private int _width;
@@ -19,13 +15,11 @@ internal sealed class GifAnimationBuilder : IAnimationBuilder {
 	private int _frameCount;
 
 	public GifAnimationBuilder(
-		IFileSystem fileSystem,
-		string filePath,
+		Stream stream,
 		TimeSpan frameDelay,
 		int loopCount
 	) {
-		_fileSystem = fileSystem;
-		_filePath = filePath;
+		_output = stream;
 		_frameDelay = frameDelay;
 		_loopCount = loopCount;
 	}
@@ -39,8 +33,6 @@ internal sealed class GifAnimationBuilder : IAnimationBuilder {
 		if( _finished ) {
 			throw new InvalidOperationException( "The animation has already been finished." );
 		}
-
-		_output ??= _fileSystem.File.Create( _filePath );
 
 		if( !_headerWritten ) {
 			_width = frame.Columns;
@@ -79,13 +71,11 @@ internal sealed class GifAnimationBuilder : IAnimationBuilder {
 			GifChunkWriter.WriteTrailer( _output );
 		} finally {
 			_output.Dispose();
-			_output = null;
 			_finished = true;
 		}
 	}
 
 	void IDisposable.Dispose() {
 		_output?.Dispose();
-		_output = null;
 	}
 }

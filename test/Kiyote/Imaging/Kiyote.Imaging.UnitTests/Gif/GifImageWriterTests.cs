@@ -7,7 +7,7 @@ namespace Kiyote.Imaging.Gif.UnitTests;
 
 [TestFixture]
 [ExcludeFromCodeCoverage]
-internal sealed class GifWriterTests {
+internal sealed class GifImageWriterTests {
 
 	private const string FileName = "image.gif";
 
@@ -21,7 +21,7 @@ internal sealed class GifWriterTests {
 	public void Setup() {
 		_fileSystem = new MockFileSystem();
 		_fileSystem.AddDirectory( _fileFolder );
-		_writer = new GifWriter( _fileSystem );
+		_writer = new GifImageWriter( _fileSystem );
 	}
 
 	[Test]

@@ -17,22 +17,39 @@ public sealed class PngWriter : IImageWriter {
 	}
 
 	void IImageWriter.WriteImage<T>(
+		Stream file,
+		IBuffer<T> pixels
+	) {
+		PngChunkWriter.ThrowIfPixelTypeNotSupported<T>();
+		ArgumentNullException.ThrowIfNull( pixels );
+
+		DoWriteImage( file, pixels );
+	}
+
+	void IImageWriter.WriteImage<T>(
 		string filePath,
 		IBuffer<T> pixels
 	) {
 		PngChunkWriter.ThrowIfPixelTypeNotSupported<T>();
-
 		ArgumentNullException.ThrowIfNull( pixels );
+		ArgumentNullException.ThrowIfNull( filePath );
 
+		using Stream output = _fileSystem.File.Create( filePath );
+		DoWriteImage( output, pixels );
+	}
+
+	private static void DoWriteImage<T>(
+		Stream file,
+		IBuffer<T> pixels
+	) {
 		int width = pixels.Columns;
 		int height = pixels.Rows;
 
-		using Stream output = _fileSystem.File.Create( filePath );
-		output.Write( _signature );
+		file.Write( _signature );
 
-		PngChunkWriter.WriteHeader( output, width, height );
+		PngChunkWriter.WriteHeader( file, width, height );
 		byte[] compressed = PngChunkWriter.CompressFrame( pixels, width, height );
-		PngChunkWriter.WriteChunk( output, "IDAT", compressed );
-		PngChunkWriter.WriteChunk( output, "IEND", [] );
+		PngChunkWriter.WriteChunk( file, "IDAT", compressed );
+		PngChunkWriter.WriteChunk( file, "IEND", [] );
 	}
 }

@@ -14,7 +14,7 @@ internal static class GifLzw {
 		int codeSize = minCodeSize + 1;
 		int nextCode = endCode + 1;
 
-		Dictionary<(int Prefix, byte Value), int> dictionary = new Dictionary<(int, byte), int>();
+		Dictionary<(int Prefix, byte Value), int> dictionary = [];
 		BitWriter writer = new BitWriter();
 		writer.WriteCode( clearCode, codeSize );
 
@@ -126,7 +126,7 @@ internal static class GifLzw {
 
 	private sealed class BitWriter {
 
-		private readonly List<byte> _bytes = new List<byte>();
+		private readonly List<byte> _bytes = [];
 		private int _bitBuffer;
 		private int _bitCount;
 

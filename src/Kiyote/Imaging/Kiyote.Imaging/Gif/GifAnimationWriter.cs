@@ -21,6 +21,18 @@ public sealed class GifAnimationWriter : IAnimationWriter {
 		ArgumentException.ThrowIfNullOrWhiteSpace( filePath );
 		ArgumentOutOfRangeException.ThrowIfNegative( loopCount );
 
-		return new GifAnimationBuilder( _fileSystem, filePath, frameDelay, loopCount );
+		Stream stream = _fileSystem.File.Create( filePath );
+		return new GifAnimationBuilder( stream, frameDelay, loopCount );
+	}
+
+	IAnimationBuilder IAnimationWriter.StartAnimation(
+		Stream file,
+		TimeSpan frameDelay,
+		int loopCount
+	) {
+		ArgumentNullException.ThrowIfNull( file );
+		ArgumentOutOfRangeException.ThrowIfNegative( loopCount );
+
+		return new GifAnimationBuilder( file, frameDelay, loopCount );
 	}
 }

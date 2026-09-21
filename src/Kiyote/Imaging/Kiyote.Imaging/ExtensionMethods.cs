@@ -29,7 +29,7 @@ public static class ExtensionMethods {
 		return services
 			.AddBuffers()
 			.AddSingleton<IFileSystem, FileSystem>()
-			.AddSingleton<IImageWriter, GifWriter>()
+			.AddSingleton<IImageWriter, GifImageWriter>()
 			.AddSingleton<IImageReader, GifReader>()
 			.AddSingleton<IAnimationWriter, GifAnimationWriter>();
 	}

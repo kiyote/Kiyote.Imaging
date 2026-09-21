@@ -21,6 +21,18 @@ public sealed class APngWriter : IAnimationWriter {
 		ArgumentException.ThrowIfNullOrWhiteSpace( filePath );
 		ArgumentOutOfRangeException.ThrowIfNegative( loopCount );
 
-		return new APngAnimationBuilder( _fileSystem, filePath, frameDelay, loopCount );
+		Stream stream = _fileSystem.File.Create( filePath );
+		return new APngAnimationBuilder( stream, frameDelay, loopCount );
+	}
+
+	IAnimationBuilder IAnimationWriter.StartAnimation(
+		Stream stream,
+		TimeSpan frameDelay,
+		int loopCount
+	) {
+		ArgumentNullException.ThrowIfNull( stream );
+		ArgumentOutOfRangeException.ThrowIfNegative( loopCount );
+
+		return new APngAnimationBuilder( stream, frameDelay, loopCount );
 	}
 }

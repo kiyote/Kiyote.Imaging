@@ -9,4 +9,9 @@ public interface IImageWriter {
 		IBuffer<T> pixels
 	);
 
+	void WriteImage<T>(
+		Stream file,
+		IBuffer<T> pixels
+	);
+
 }

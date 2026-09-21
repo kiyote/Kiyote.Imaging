@@ -8,4 +8,10 @@ public interface IAnimationWriter {
 		int loopCount = 0
 	);
 
+	IAnimationBuilder StartAnimation(
+		Stream file,
+		TimeSpan frameDelay,
+		int loopCount = 0
+	);
+
 }

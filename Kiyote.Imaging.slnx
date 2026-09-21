@@ -3,6 +3,7 @@
     <File Path=".editorconfig" />
     <File Path=".gitignore" />
     <File Path=".runsettings" />
+    <File Path="BENCHMARK.md" />
     <File Path="CODEOWNERS" />
     <File Path="create-orphan-branch.sh" />
     <File Path="DEVELOPMENT.md" />
@@ -29,6 +30,7 @@
   <Folder Name="/test/" />
   <Folder Name="/test/Kiyote/" />
   <Folder Name="/test/Kiyote/Imaging/">
+    <Project Path="test/Kiyote/Imaging/Kiyote.Imaging.Benchmarks/Kiyote.Imaging.Benchmarks.csproj" Id="07a0c243-833f-43bf-bc17-a02b0cb86e6d" />
     <Project Path="test/Kiyote/Imaging/Kiyote.Imaging.IntegrationTests/Kiyote.Imaging.IntegrationTests.csproj" Id="aaef6ce1-72b9-4d6e-b1ea-f61fae085fb7" />
     <Project Path="test/Kiyote/Imaging/Kiyote.Imaging.UnitTests/Kiyote.Imaging.UnitTests.csproj" Id="ae21999a-5a2a-4634-b39e-780bd2eb5c00" />
   </Folder>

@@ -1,5 +1,4 @@
 using System.Buffers.Binary;
-using System.IO.Abstractions;
 using Kiyote.Buffers;
 
 namespace Kiyote.Imaging.Png;
@@ -12,12 +11,10 @@ internal sealed class APngAnimationBuilder : IAnimationBuilder {
 
 	private static readonly byte[] _signature = [137, 80, 78, 71, 13, 10, 26, 10];
 
-	private readonly IFileSystem _fileSystem;
-	private readonly string _filePath;
 	private readonly TimeSpan _frameDelay;
 	private readonly int _loopCount;
 
-	private Stream? _output;
+	private readonly Stream _output;
 	private bool _headerWritten;
 	private bool _finished;
 	private int _width;
@@ -27,13 +24,11 @@ internal sealed class APngAnimationBuilder : IAnimationBuilder {
 	private long _animationControlPosition;
 
 	public APngAnimationBuilder(
-		IFileSystem fileSystem,
-		string filePath,
+		Stream stream,
 		TimeSpan frameDelay,
 		int loopCount
 	) {
-		_fileSystem = fileSystem;
-		_filePath = filePath;
+		_output = stream;
 		_frameDelay = frameDelay;
 		_loopCount = loopCount;
 	}
@@ -47,8 +42,6 @@ internal sealed class APngAnimationBuilder : IAnimationBuilder {
 		if( _finished ) {
 			throw new InvalidOperationException( "The animation has already been finished." );
 		}
-
-		_output ??= _fileSystem.File.Create( _filePath );
 
 		if( !_headerWritten ) {
 			_output.Write( _signature );
@@ -93,14 +86,12 @@ internal sealed class APngAnimationBuilder : IAnimationBuilder {
 			_output.Position = endPosition;
 		} finally {
 			_output.Dispose();
-			_output = null;
 			_finished = true;
 		}
 	}
 
 	void IDisposable.Dispose() {
 		_output?.Dispose();
-		_output = null;
 	}
 
 	private static void WriteAnimationControl(

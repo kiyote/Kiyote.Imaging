@@ -22,7 +22,7 @@ internal sealed class GifReaderTests {
 	public void Setup() {
 		_fileSystem = new MockFileSystem();
 		_fileSystem.AddDirectory( _fileFolder );
-		_writer = new GifWriter( _fileSystem );
+		_writer = new GifImageWriter( _fileSystem );
 		_reader = new GifReader( MockBufferFactory.Create(), _fileSystem );
 	}
 
